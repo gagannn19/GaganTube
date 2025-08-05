@@ -2,48 +2,95 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>YouTube Embed Viewer</title>
+  <title>GAGANTUBE</title>
   <style>
+    /* Reset & base styling */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      padding: 20px;
+      background-color: #0f0f0f;
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       text-align: center;
+      padding: 30px;
     }
 
-    h1 {
-      color: #333;
+    /* Header like YouTube */
+    header {
+      background-color: #202020;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     }
 
+    header h1 {
+      font-size: 2.5em;
+      color: #ff0000;
+      letter-spacing: 2px;
+      font-weight: 700;
+      text-shadow: 2px 2px 8px rgba(255,0,0,0.3);
+    }
+
+    /* Input box */
     input[type="text"] {
       width: 80%;
-      padding: 10px;
-      font-size: 16px;
-      margin-bottom: 20px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      max-width: 600px;
+      padding: 15px;
+      font-size: 18px;
+      margin: 20px auto;
+      border: 1px solid #333;
+      border-radius: 8px;
+      background-color: #1c1c1c;
+      color: #fff;
     }
 
+    input[type="text"]::placeholder {
+      color: #888;
+    }
+
+    /* Video container */
     iframe {
-      width: 80%;
+      width: 90%;
+      max-width: 800px;
       height: 450px;
       border: none;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      border-radius: 12px;
+      margin-top: 20px;
+      box-shadow: 0 0 20px rgba(255,0,0,0.2);
     }
 
     #error {
-      color: red;
+      color: #ff4d4d;
       margin-top: 10px;
+      font-size: 16px;
+    }
+
+    footer {
+      margin-top: 50px;
+      font-size: 14px;
+      color: #666;
     }
   </style>
 </head>
 <body>
 
-  <h1>Paste YouTube Link Below</h1>
-  <input type="text" id="youtubeLink" placeholder="Paste YouTube URL here" oninput="embedVideo()">
+  <header>
+    <h1>GAGANTUBE</h1>
+  </header>
+
+  <p>Paste any YouTube video link below to watch instantly!</p>
+  <input type="text" id="youtubeLink" placeholder="e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ" oninput="embedVideo()">
+  
   <div id="videoContainer"></div>
   <div id="error"></div>
+
+  <footer>
+    &copy; 2025 Gagan | GAGANTUBE – Watch Through Link
+  </footer>
 
   <script>
     function extractVideoID(url) {
@@ -59,12 +106,12 @@
       const error = document.getElementById('error');
 
       if (videoID) {
-        container.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoID}" allowfullscreen controls></iframe>`;
+        container.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoID}" allowfullscreen></iframe>`;
         error.textContent = '';
       } else {
         container.innerHTML = '';
         if (input !== '') {
-          error.textContent = 'Invalid YouTube URL';
+          error.textContent = '⚠️ Invalid YouTube URL';
         } else {
           error.textContent = '';
         }
