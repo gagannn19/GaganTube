@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube Embed Viewer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    input[type="text"] {
+      width: 80%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    iframe {
+      width: 80%;
+      height: 450px;
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    #error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Paste YouTube Link Below</h1>
+  <input type="text" id="youtubeLink" placeholder="Paste YouTube URL here" oninput="embedVideo()">
+  <div id="videoContainer"></div>
+  <div id="error"></div>
+
+  <script>
+    function extractVideoID(url) {
+      const regExp = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+      const match = url.match(regExp);
+      return match ? match[1] : null;
+    }
+
+    function embedVideo() {
+      const input = document.getElementById('youtubeLink').value.trim();
+      const videoID = extractVideoID(input);
+      const container = document.getElementById('videoContainer');
+      const error = document.getElementById('error');
+
+      if (videoID) {
+        container.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoID}" allowfullscreen controls></iframe>`;
+        error.textContent = '';
+      } else {
+        container.innerHTML = '';
+        if (input !== '') {
+          error.textContent = 'Invalid YouTube URL';
+        } else {
+          error.textContent = '';
+        }
+      }
+    }
+  </script>
+
+</body>
+</html>
