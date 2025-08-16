@@ -4,13 +4,6 @@
   <meta charset="UTF-8">
   <title>GAGANTUBE</title>
   <style>
-    /* Reset & base styling */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
     body {
       background-color: #0f0f0f;
       color: #fff;
@@ -18,15 +11,12 @@
       text-align: center;
       padding: 30px;
     }
-
-    /* Header like YouTube */
     header {
       background-color: #202020;
       padding: 20px;
       margin-bottom: 30px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     }
-
     header h1 {
       font-size: 2.5em;
       color: #ff0000;
@@ -34,25 +24,28 @@
       font-weight: 700;
       text-shadow: 2px 2px 8px rgba(255,0,0,0.3);
     }
-
-    /* Input box */
     input[type="text"] {
-      width: 80%;
-      max-width: 600px;
-      padding: 15px;
-      font-size: 18px;
-      margin: 20px auto;
+      width: 70%;
+      max-width: 500px;
+      padding: 12px;
+      font-size: 16px;
+      margin: 10px auto;
       border: 1px solid #333;
       border-radius: 8px;
       background-color: #1c1c1c;
       color: #fff;
     }
-
-    input[type="text"]::placeholder {
-      color: #888;
+    button {
+      padding: 10px 15px;
+      margin: 8px;
+      border: none;
+      border-radius: 8px;
+      background-color: #ff0000;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
     }
-
-    /* Video container */
+    button:hover { background-color: #cc0000; }
     iframe {
       width: 90%;
       max-width: 800px;
@@ -62,15 +55,47 @@
       margin-top: 20px;
       box-shadow: 0 0 20px rgba(255,0,0,0.2);
     }
-
-    #error {
-      color: #ff4d4d;
-      margin-top: 10px;
-      font-size: 16px;
+    #error { color: #ff4d4d; margin-top: 10px; }
+    #savedVideos {
+      margin-top: 30px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 15px;
     }
-
+    .videoCard {
+      background: #1c1c1c;
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .2s;
+      position: relative;
+    }
+    .videoCard:hover { transform: scale(1.05); }
+    .videoCard img {
+      width: 100%;
+      display: block;
+    }
+    .videoCard p {
+      padding: 8px;
+      font-size: 13px;
+      text-align: left;
+      color: #ccc;
+      word-break: break-word;
+    }
+    .removeBtn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255,0,0,0.8);
+      border: none;
+      color: white;
+      padding: 5px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 12px;
+    }
     footer {
-      margin-top: 50px;
+      margin-top: 40px;
       font-size: 14px;
       color: #666;
     }
@@ -82,41 +107,98 @@
     <h1>GAGANTUBE</h1>
   </header>
 
-  <p>Paste any YouTube video link below to watch instantly!</p>
-  <input type="text" id="youtubeLink" placeholder="e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ" oninput="embedVideo()">
+  <p>Paste a YouTube video link below, save it, and build your own mini playlist!</p>
+  <input type="text" id="youtubeLink" placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+  <button onclick="saveVideo()">Save</button>
   
   <div id="videoContainer"></div>
   <div id="error"></div>
 
+  <h2 style="margin-top:40px;">Saved Videos</h2>
+  <div id="savedVideos"></div>
+
   <footer>
-    &copy; 2025 Gagan | GAGANTUBE – Watch Through Link
+    © 2025 Gagan | GAGANTUBE – Watch Through Link
   </footer>
 
   <script>
     function extractVideoID(url) {
-      const regExp = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-      const match = url.match(regExp);
-      return match ? match[1] : null;
+      try {
+        let u = new URL(url);
+        if (u.hostname === "youtu.be") {
+          return u.pathname.slice(1);
+        }
+        if (u.searchParams.get("v")) {
+          return u.searchParams.get("v");
+        }
+        let parts = u.pathname.split("/");
+        let maybeID = parts[parts.length - 1];
+        if (maybeID.length === 11) return maybeID;
+      } catch (e) {
+        if (url.length === 11) return url;
+      }
+      return null;
     }
 
-    function embedVideo() {
+    function playVideo(videoID) {
+      document.getElementById('videoContainer').innerHTML =
+        `<iframe src="https://www.youtube.com/embed/${videoID}" allowfullscreen></iframe>`;
+    }
+
+    function saveVideo() {
       const input = document.getElementById('youtubeLink').value.trim();
       const videoID = extractVideoID(input);
-      const container = document.getElementById('videoContainer');
       const error = document.getElementById('error');
 
-      if (videoID) {
-        container.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoID}" allowfullscreen></iframe>`;
-        error.textContent = '';
-      } else {
-        container.innerHTML = '';
-        if (input !== '') {
-          error.textContent = '⚠️ Invalid YouTube URL';
-        } else {
-          error.textContent = '';
-        }
+      if (!videoID) {
+        error.textContent = '⚠️ Invalid YouTube URL';
+        return;
       }
+      error.textContent = '';
+
+      let saved = JSON.parse(localStorage.getItem('gaganVideos') || '[]');
+
+      if (saved.length >= 10) {
+        alert('You can only save up to 10 videos.');
+        return;
+      }
+
+      if (!saved.includes(videoID)) {
+        saved.push(videoID);
+        localStorage.setItem('gaganVideos', JSON.stringify(saved));
+        renderSaved();
+      } else {
+        alert('This video is already saved.');
+      }
+
+      document.getElementById('youtubeLink').value = "";
     }
+
+    function removeVideo(id) {
+      let saved = JSON.parse(localStorage.getItem('gaganVideos') || '[]');
+      saved = saved.filter(v => v !== id);
+      localStorage.setItem('gaganVideos', JSON.stringify(saved));
+      renderSaved();
+    }
+
+    function renderSaved() {
+      const saved = JSON.parse(localStorage.getItem('gaganVideos') || '[]');
+      const container = document.getElementById('savedVideos');
+      container.innerHTML = '';
+      saved.forEach(id => {
+        const card = document.createElement('div');
+        card.className = 'videoCard';
+        card.innerHTML = `
+          <button class="removeBtn" onclick="event.stopPropagation(); removeVideo('${id}')">X</button>
+          <img src="https://img.youtube.com/vi/${id}/hqdefault.jpg" alt="Thumbnail">
+          <p>https://youtu.be/${id}</p>
+        `;
+        card.onclick = () => playVideo(id);
+        container.appendChild(card);
+      });
+    }
+
+    renderSaved();
   </script>
 
 </body>
