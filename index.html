@@ -118,11 +118,11 @@
     <h1>GAGANTUBE</h1>
   </header>
 
-  <p>Paste a YouTube video link below, write 50+ words about that video, and save it to your playlist!</p>
+  <p>Paste a YouTube video link below, write 20+ words about that video, and save it to your playlist!</p>
   <input type="text" id="youtubeLink" placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
   
-  <textarea id="accountabilityNote" placeholder="Write 50 words about that video"></textarea>
-  <div id="wordCount">0 / 50 words</div>
+  <textarea id="accountabilityNote" placeholder="Write 20 words about that video"></textarea>
+  <div id="wordCount">0 / 20 words</div>
 
   <button onclick="saveVideo()">Save</button>
   <button onclick="clearAllVideos()">Clear All Videos</button>
@@ -175,8 +175,8 @@
         error.textContent = '⚠️ Invalid YouTube URL';
         return;
       }
-      if (wordCount(note) < 50) {
-        error.textContent = '⚠️ Please write at least 50 words before saving.';
+      if (wordCount(note) < 20) {
+        error.textContent = '⚠️ Please write at least 20 words before saving.';
         return;
       }
       error.textContent = '';
@@ -198,7 +198,7 @@
 
       document.getElementById('youtubeLink').value = "";
       document.getElementById('accountabilityNote').value = "";
-      document.getElementById('wordCount').textContent = "0 / 50 words";
+      document.getElementById('wordCount').textContent = "0 / 20 words";
     }
 
     function removeVideo(id) {
@@ -230,7 +230,6 @@
         `;
         card.onclick = () => playVideo(v.id);
 
-        // Attach remove button properly
         const removeBtn = card.querySelector('.removeBtn');
         removeBtn.onclick = (e) => {
           e.stopPropagation();
@@ -244,8 +243,8 @@
     // Live word counter
     document.getElementById('accountabilityNote').addEventListener('input', function() {
       const count = wordCount(this.value);
-      document.getElementById('wordCount').textContent = count + " / 50 words";
-      if (count < 50) {
+      document.getElementById('wordCount').textContent = count + " / 20 words";
+      if (count < 20) {
         document.getElementById('wordCount').style.color = "#ff4d4d";
       } else {
         document.getElementById('wordCount').style.color = "#4dff88";
