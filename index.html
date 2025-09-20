@@ -215,12 +215,20 @@
         const card = document.createElement('div');
         card.className = 'videoCard';
         card.innerHTML = `
-          <button class="removeBtn" onclick="event.stopPropagation(); removeVideo('${v.id}')">X</button>
+          <button class="removeBtn">X</button>
           <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg" alt="Thumbnail">
           <p><b>Link:</b> https://youtu.be/${v.id}</p>
           <p><b>Note:</b> ${v.note}</p>
         `;
         card.onclick = () => playVideo(v.id);
+
+        // Attach remove button properly
+        const removeBtn = card.querySelector('.removeBtn');
+        removeBtn.onclick = (e) => {
+          e.stopPropagation();
+          removeVideo(v.id);
+        };
+
         container.appendChild(card);
       });
     }
