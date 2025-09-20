@@ -118,13 +118,14 @@
     <h1>GAGANTUBE</h1>
   </header>
 
-  <p>Paste a YouTube video link below, write 50+ words as accountability, and save it to your playlist!</p>
+  <p>Paste a YouTube video link below, write 50+ words about that video, and save it to your playlist!</p>
   <input type="text" id="youtubeLink" placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
   
-  <textarea id="accountabilityNote" placeholder="Write at least 50 words..."></textarea>
+  <textarea id="accountabilityNote" placeholder="Write 50 words about that video"></textarea>
   <div id="wordCount">0 / 50 words</div>
 
   <button onclick="saveVideo()">Save</button>
+  <button onclick="clearAllVideos()">Clear All Videos</button>
   
   <div id="videoContainer"></div>
   <div id="error"></div>
@@ -205,6 +206,13 @@
       saved = saved.filter(v => v.id !== id);
       localStorage.setItem('gaganVideos', JSON.stringify(saved));
       renderSaved();
+    }
+
+    function clearAllVideos() {
+      if (confirm("Are you sure you want to delete ALL saved videos?")) {
+        localStorage.removeItem('gaganVideos');
+        renderSaved();
+      }
     }
 
     function renderSaved() {
