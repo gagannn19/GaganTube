@@ -24,7 +24,7 @@
       font-weight: 700;
       text-shadow: 2px 2px 8px rgba(255,0,0,0.3);
     }
-    input[type="text"] {
+    input[type="text"], textarea {
       width: 70%;
       max-width: 500px;
       padding: 12px;
@@ -34,6 +34,17 @@
       border-radius: 8px;
       background-color: #1c1c1c;
       color: #fff;
+      display: block;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+    #wordCount {
+      font-size: 14px;
+      margin-top: -5px;
+      margin-bottom: 10px;
+      color: #aaa;
     }
     button {
       padding: 10px 15px;
@@ -69,6 +80,7 @@
       cursor: pointer;
       transition: transform .2s;
       position: relative;
+      text-align: left;
     }
     .videoCard:hover { transform: scale(1.05); }
     .videoCard img {
@@ -78,7 +90,6 @@
     .videoCard p {
       padding: 8px;
       font-size: 13px;
-      text-align: left;
       color: #ccc;
       word-break: break-word;
     }
@@ -107,8 +118,12 @@
     <h1>GAGANTUBE</h1>
   </header>
 
-  <p>Paste a YouTube video link below, save it, and build your own mini playlist!</p>
+  <p>Paste a YouTube video link below, write 50+ words as accountability, and save it to your playlist!</p>
   <input type="text" id="youtubeLink" placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+  
+  <textarea id="accountabilityNote" placeholder="Write at least 50 words..."></textarea>
+  <div id="wordCount">0 / 50 words</div>
+
   <button onclick="saveVideo()">Save</button>
   
   <div id="videoContainer"></div>
@@ -145,8 +160,13 @@
         `<iframe src="https://www.youtube.com/embed/${videoID}" allowfullscreen></iframe>`;
     }
 
+    function wordCount(str) {
+      return str.trim().split(/\s+/).filter(Boolean).length;
+    }
+
     function saveVideo() {
       const input = document.getElementById('youtubeLink').value.trim();
+      const note = document.getElementById('accountabilityNote').value.trim();
       const videoID = extractVideoID(input);
       const error = document.getElementById('error');
 
@@ -154,17 +174,21 @@
         error.textContent = '⚠️ Invalid YouTube URL';
         return;
       }
+      if (wordCount(note) < 50) {
+        error.textContent = '⚠️ Please write at least 50 words before saving.';
+        return;
+      }
       error.textContent = '';
 
       let saved = JSON.parse(localStorage.getItem('gaganVideos') || '[]');
 
       if (saved.length >= 100) {
-        alert('You can only save up to 10 videos.');
+        alert('You can only save up to 100 videos.');
         return;
       }
 
-      if (!saved.includes(videoID)) {
-        saved.push(videoID);
+      if (!saved.some(v => v.id === videoID)) {
+        saved.push({ id: videoID, note: note });
         localStorage.setItem('gaganVideos', JSON.stringify(saved));
         renderSaved();
       } else {
@@ -172,11 +196,13 @@
       }
 
       document.getElementById('youtubeLink').value = "";
+      document.getElementById('accountabilityNote').value = "";
+      document.getElementById('wordCount').textContent = "0 / 50 words";
     }
 
     function removeVideo(id) {
       let saved = JSON.parse(localStorage.getItem('gaganVideos') || '[]');
-      saved = saved.filter(v => v !== id);
+      saved = saved.filter(v => v.id !== id);
       localStorage.setItem('gaganVideos', JSON.stringify(saved));
       renderSaved();
     }
@@ -185,18 +211,30 @@
       const saved = JSON.parse(localStorage.getItem('gaganVideos') || '[]');
       const container = document.getElementById('savedVideos');
       container.innerHTML = '';
-      saved.forEach(id => {
+      saved.forEach(v => {
         const card = document.createElement('div');
         card.className = 'videoCard';
         card.innerHTML = `
-          <button class="removeBtn" onclick="event.stopPropagation(); removeVideo('${id}')">X</button>
-          <img src="https://img.youtube.com/vi/${id}/hqdefault.jpg" alt="Thumbnail">
-          <p>https://youtu.be/${id}</p>
+          <button class="removeBtn" onclick="event.stopPropagation(); removeVideo('${v.id}')">X</button>
+          <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg" alt="Thumbnail">
+          <p><b>Link:</b> https://youtu.be/${v.id}</p>
+          <p><b>Note:</b> ${v.note}</p>
         `;
-        card.onclick = () => playVideo(id);
+        card.onclick = () => playVideo(v.id);
         container.appendChild(card);
       });
     }
+
+    // Live word counter
+    document.getElementById('accountabilityNote').addEventListener('input', function() {
+      const count = wordCount(this.value);
+      document.getElementById('wordCount').textContent = count + " / 50 words";
+      if (count < 50) {
+        document.getElementById('wordCount').style.color = "#ff4d4d";
+      } else {
+        document.getElementById('wordCount').style.color = "#4dff88";
+      }
+    });
 
     renderSaved();
   </script>
