@@ -2,256 +2,1190 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>GAGANTUBE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0f0f0f;
+      --surface: #272727;
+      --surface-hover: #3f3f3f;
+      --border: #303030;
+      --text: #f1f1f1;
+      --text-2: #aaaaaa;
+      --red: #ff0033;
+      --link: #3ea6ff;
+    }
+
     body {
-      background-color: #0f0f0f;
-      color: #fff;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      text-align: center;
-      padding: 30px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Roboto', Arial, sans-serif;
+      font-size: 14px;
     }
-    header {
-      background-color: #202020;
-      padding: 20px;
-      margin-bottom: 30px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+
+    button { font: inherit; color: inherit; cursor: pointer; border: none; background: none; }
+    input { font: inherit; color: inherit; }
+
+    /* ---------- Top bar ---------- */
+    .topbar {
+      position: sticky; top: 0; z-index: 10;
+      height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px;
+      background: var(--bg);
     }
-    header h1 {
-      font-size: 2.5em;
-      color: #ff0000;
-      letter-spacing: 2px;
-      font-weight: 700;
-      text-shadow: 2px 2px 8px rgba(255,0,0,0.3);
+    .logo {
+      display: flex; align-items: center; gap: 4px;
+      text-decoration: none; color: var(--text);
+      font-size: 20px; font-weight: 700; letter-spacing: -0.5px;
+      min-width: 140px;
     }
-    input[type="text"], textarea {
-      width: 70%;
-      max-width: 500px;
-      padding: 12px;
+    .logo svg { width: 30px; height: 21px; }
+    .brand { display: flex; flex-direction: column; line-height: 1.05; }
+    .tagline {
+      font-size: 10px; font-weight: 400; letter-spacing: .3px;
+      color: var(--text-2); white-space: nowrap;
+    }
+
+    .search {
+      flex: 0 1 640px;
+      display: flex; height: 40px;
+      margin: 0 16px;
+    }
+    .search input {
+      flex: 1; min-width: 0;
+      padding: 0 16px;
+      background: #121212;
+      border: 1px solid var(--border);
+      border-right: none;
+      border-radius: 40px 0 0 40px;
       font-size: 16px;
-      margin: 10px auto;
-      border: 1px solid #333;
-      border-radius: 8px;
-      background-color: #1c1c1c;
-      color: #fff;
-      display: block;
+      outline: none;
     }
-    textarea {
-      resize: vertical;
-      min-height: 100px;
+    .search input:focus { border-color: #1c62b9; }
+    .search input::placeholder { color: #888; }
+    .search button {
+      width: 64px;
+      background: #222;
+      border: 1px solid var(--border);
+      border-radius: 0 40px 40px 0;
+      display: grid; place-items: center;
     }
-    #wordCount {
-      font-size: 14px;
-      margin-top: -5px;
-      margin-bottom: 10px;
-      color: #aaa;
+    .search button:hover { background: var(--surface); }
+    .search svg { width: 22px; height: 22px; fill: var(--text); }
+
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #7b1fa2; display: grid; place-items: center;
+      font-weight: 500; min-width: 32px;
     }
-    button {
-      padding: 10px 15px;
-      margin: 8px;
-      border: none;
-      border-radius: 8px;
-      background-color: #ff0000;
-      color: #fff;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:hover { background-color: #cc0000; }
-    iframe {
-      width: 90%;
-      max-width: 800px;
-      height: 450px;
-      border: none;
-      border-radius: 12px;
-      margin-top: 20px;
-      box-shadow: 0 0 20px rgba(255,0,0,0.2);
-    }
-    #error { color: #ff4d4d; margin-top: 10px; }
-    #savedVideos {
-      margin-top: 30px;
+    .topbar-right { min-width: 140px; display: flex; justify-content: flex-end; }
+
+    #error { color: #ff4e45; text-align: center; padding: 4px 16px 0; min-height: 0; }
+    #error:empty { display: none; }
+
+    /* ---------- Home grid ---------- */
+    .home {
+      padding: 24px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 40px 16px;
     }
-    .videoCard {
-      background: #1c1c1c;
-      border-radius: 10px;
-      overflow: hidden;
+    .card { cursor: pointer; position: relative; }
+    .card .thumb {
+      width: 100%; aspect-ratio: 16/9; object-fit: cover;
+      background: var(--surface); display: block;
+    }
+    .card .meta { padding-top: 12px; padding-right: 24px; }
+    .card .title {
+      font-size: 16px; font-weight: 500; line-height: 22px;
+      display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .card .sub { color: var(--text-2); margin-top: 4px; }
+    .remove {
+      position: absolute; top: 8px; right: 8px;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(0,0,0,.7); font-size: 16px; line-height: 28px;
+      opacity: 0; transition: opacity .15s;
+    }
+    .card:hover .remove, .side-item:hover .remove { opacity: 1; }
+
+    /* ---------- Watch page ---------- */
+    .watch {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 402px;
+      gap: 24px;
+      padding: 24px;
+      max-width: 1754px; margin: 0 auto;
+    }
+    .player-wrap {
+      position: relative; width: 100%; aspect-ratio: 16/9;
+      border-radius: 12px; overflow: hidden; background: #000;
+    }
+    .player-wrap iframe, #player { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+    /* Covers YouTube's "More videos" / end-screen suggestions */
+    .cover {
+      position: absolute; left: 0; right: 0; top: 0;
+      display: none; place-items: center;
+      background-size: cover; background-position: center;
       cursor: pointer;
-      transition: transform .2s;
+    }
+    .cover::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,.55); }
+    .cover.show { display: grid; }
+    .cover .big {
       position: relative;
-      text-align: left;
+      width: 68px; height: 48px; border-radius: 14px;
+      background: var(--red); display: grid; place-items: center;
     }
-    .videoCard:hover { transform: scale(1.05); }
-    .videoCard img {
-      width: 100%;
-      display: block;
+    .cover .big svg { width: 24px; height: 24px; fill: #fff; }
+    #pauseCover { bottom: 56px; }  /* leave the control bar usable */
+    #endCover { bottom: 0; }
+
+    .video-title { font-size: 20px; font-weight: 700; line-height: 28px; margin-top: 12px; }
+    .channel { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+    .channel .avatar { width: 40px; height: 40px; min-width: 40px; background: #555; }
+    .channel-name { font-size: 16px; font-weight: 500; }
+
+    /* Timestamps box (styled like YouTube's description box) */
+    .notes {
+      margin-top: 12px;
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 12px;
     }
-    .videoCard p {
-      padding: 8px;
-      font-size: 13px;
-      color: #ccc;
-      word-break: break-word;
+    .notes-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; }
+    .notes h3 { font-size: 14px; font-weight: 500; }
+    .notes-actions { display: flex; gap: 4px; }
+    .text-btn { height: 32px; padding: 0 12px; border-radius: 16px; color: var(--text-2); font-weight: 500; font-size: 13px; }
+    .text-btn:hover { background: rgba(255,255,255,.1); color: var(--text); }
+    .hint { color: var(--text-2); font-size: 12px; margin-top: 8px; }
+    kbd { font: inherit; padding: 0 5px; border: 1px solid #555; border-radius: 4px; }
+    .notes-form { display: flex; gap: 8px; flex-wrap: wrap; }
+    .notes-form input {
+      background: transparent;
+      border: none; border-bottom: 1px solid #717171;
+      padding: 6px 2px; outline: none; font-size: 14px;
     }
-    .removeBtn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: rgba(255,0,0,0.8);
-      border: none;
-      color: white;
-      padding: 5px 8px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 12px;
+    .notes-form input:focus { border-bottom: 2px solid var(--text); }
+    #tsTime { width: 80px; }
+    #tsText { flex: 1; min-width: 160px; }
+    .pill {
+      height: 36px; padding: 0 16px; border-radius: 18px;
+      background: rgba(255,255,255,.1); font-weight: 500;
     }
-    footer {
-      margin-top: 40px;
-      font-size: 14px;
-      color: #666;
+    .pill:hover { background: rgba(255,255,255,.2); }
+    .pill.primary { background: var(--text); color: #0f0f0f; }
+    .pill.primary:hover { background: #d9d9d9; }
+
+    .ts-list { list-style: none; margin-top: 12px; }
+    .ts-list li {
+      display: flex; align-items: center; gap: 10px;
+      padding: 4px 8px; margin: 0 -8px; line-height: 20px; border-radius: 8px;
+    }
+    .ts-list li:hover { background: rgba(255,255,255,.06); }
+    .ts-list li.current { background: rgba(62,166,255,.14); }
+    .ts-list li .icon { opacity: .55; }
+    .ts-list li:hover .icon { opacity: 1; }
+    .icon {
+      width: 30px; height: 30px; min-width: 30px; border-radius: 50%;
+      display: grid; place-items: center; color: var(--text-2);
+    }
+    .icon:hover { background: rgba(255,255,255,.12); color: var(--text); }
+    .icon svg { width: 18px; height: 18px; fill: currentColor; }
+    .ts-list .edit-time, .ts-list .edit-text {
+      background: #121212; border: 1px solid #555; border-radius: 6px;
+      padding: 4px 8px; outline: none;
+    }
+    .ts-list .edit-time { width: 72px; }
+    .ts-list .edit-text { flex: 1; }
+    .ts-list .edit-time:focus, .ts-list .edit-text:focus { border-color: var(--link); }
+    .ts-list a { color: var(--link); text-decoration: none; cursor: pointer; font-variant-numeric: tabular-nums; }
+    .ts-list a:hover { text-decoration: underline; }
+    .ts-list .note { flex: 1; word-break: break-word; }
+    .ts-empty { color: var(--text-2); margin-top: 10px; }
+
+    /* Sidebar: your own videos only */
+    .side-head { font-size: 16px; font-weight: 500; margin-bottom: 12px; }
+    .side-item {
+      display: flex; gap: 8px; margin-bottom: 8px; cursor: pointer;
+      position: relative; border-radius: 8px;
+    }
+    .side-item.active { background: rgba(255,255,255,.08); }
+    .side-item img {
+      width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block;
+      background: var(--surface);
+    }
+    .side-item .title {
+      font-size: 14px; font-weight: 500; line-height: 20px;
+      display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .side-item .sub { color: var(--text-2); font-size: 12px; margin-top: 4px; }
+
+    /* Watch progress bar on thumbnails */
+    .thumb-wrap { position: relative; border-radius: 12px; overflow: hidden; }
+    .side-item .thumb-wrap { border-radius: 8px; width: 168px; min-width: 168px; }
+    .progress { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgba(255,255,255,.3); }
+    .progress span { display: block; height: 100%; background: var(--red); }
+    .badge {
+      position: absolute; right: 6px; bottom: 10px;
+      background: rgba(0,0,0,.8); font-size: 12px; font-weight: 500;
+      padding: 1px 4px; border-radius: 4px;
+    }
+
+    .section-head {
+      grid-column: 1 / -1; font-size: 20px; font-weight: 700;
+      margin-bottom: -24px;
+    }
+    .section-head:not(:first-child) { margin-top: 8px; }
+
+    /* Playlist card: stacked look + count overlay, like YouTube */
+    .pl-card .thumb-wrap { overflow: visible; }
+    .pl-card .thumb-wrap::before, .pl-card .thumb-wrap::after {
+      content: ''; position: absolute; left: 12px; right: 12px; top: -4px; height: 8px;
+      border-radius: 12px 12px 0 0; background: #555; z-index: -1;
+    }
+    .pl-card .thumb-wrap::after { left: 24px; right: 24px; top: -8px; background: #3a3a3a; z-index: -2; }
+    .pl-card .thumb { border-radius: 12px; }
+    .pl-count {
+      position: absolute; right: 6px; bottom: 6px;
+      background: rgba(0,0,0,.8); font-size: 12px; font-weight: 500;
+      padding: 2px 6px; border-radius: 4px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .pl-count svg { width: 16px; height: 16px; fill: #fff; }
+    .card .sub a { color: var(--text-2); text-decoration: none; font-weight: 500; }
+    .card .sub a:hover { color: var(--text); }
+
+    /* Playlist panel on the watch page */
+    .pl-panel {
+      border: 1px solid var(--border); border-radius: 12px;
+      margin-bottom: 24px; overflow: hidden;
+    }
+    .pl-panel-head { padding: 12px 8px 8px 16px; background: #212121; }
+    .pl-panel-title { font-size: 20px; font-weight: 700; line-height: 28px; }
+    .pl-panel-sub { color: var(--text-2); font-size: 12px; margin-top: 2px; }
+    .pl-controls { display: flex; gap: 2px; margin-top: 6px; margin-left: -8px; align-items: center; }
+    .pl-controls .icon.on { color: var(--text); background: rgba(255,255,255,.12); }
+    .pl-list { max-height: 420px; overflow-y: auto; padding: 4px 0; }
+    .pl-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 4px 8px 4px 0; cursor: pointer;
+    }
+    .pl-item:hover { background: rgba(255,255,255,.08); }
+    .pl-item.active { background: rgba(255,255,255,.14); }
+    .pl-num { width: 24px; min-width: 24px; text-align: center; color: var(--text-2); font-size: 12px; }
+    .pl-item .thumb-wrap { width: 100px; min-width: 100px; border-radius: 8px; }
+    .pl-item img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; background: var(--surface); }
+    .pl-item .title {
+      font-size: 14px; font-weight: 500; line-height: 20px;
+      display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .pl-item .sub { color: var(--text-2); font-size: 12px; margin-top: 2px; }
+    .loading { color: var(--text-2); padding: 12px 16px; }
+
+    .empty-home { grid-column: 1 / -1; text-align: center; color: var(--text-2); padding-top: 80px; }
+
+    /* Toast (like YouTube's snackbar) */
+    .toast {
+      position: fixed; left: 24px; bottom: 24px; z-index: 50;
+      background: #f1f1f1; color: #0f0f0f;
+      border-radius: 8px; padding: 0 8px 0 16px; min-height: 48px;
+      display: flex; align-items: center; gap: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.5);
+      transform: translateY(150%); transition: transform .2s;
+    }
+    .toast.show { transform: none; }
+    .toast button { color: #065fd4; font-weight: 500; padding: 8px 12px; border-radius: 18px; }
+    .toast button:hover { background: rgba(6,95,212,.1); }
+
+    /* Avatar menu */
+    .menu-wrap { position: relative; }
+    .avatar { cursor: pointer; }
+    .menu {
+      position: absolute; right: 0; top: 40px; z-index: 20;
+      background: #282828; border-radius: 12px; padding: 8px 0; min-width: 240px;
+      box-shadow: 0 4px 32px rgba(0,0,0,.6);
+    }
+    .menu button { display: block; width: 100%; text-align: left; padding: 10px 16px; }
+    .menu button:hover { background: rgba(255,255,255,.1); }
+    .menu hr { border: none; border-top: 1px solid #3f3f3f; margin: 8px 0; }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 1000px) {
+      .watch { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .topbar { padding: 0 8px; }
+      .logo { min-width: 0; }
+      .brand { display: none; }
+      .topbar-right { min-width: 0; }
+      .search { margin: 0 8px; }
+      .search button { width: 48px; }
+      .home, .watch { padding: 16px 0; }
+      .player-wrap { border-radius: 0; }
+      .watch > div > :not(.player-wrap), .side, .home { padding-left: 12px; padding-right: 12px; }
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>GAGANTUBE</h1>
+  <header class="topbar">
+    <a class="logo" href="#" onclick="goHome(); return false;">
+      <svg viewBox="0 0 30 21"><rect width="30" height="21" rx="6" fill="#ff0033"/><path d="M12 6v9l8-4.5z" fill="#fff"/></svg>
+      <span class="brand">
+        GAGANTUBE
+        <small class="tagline">Your videos. Zero distractions.</small>
+      </span>
+    </a>
+    <form class="search" onsubmit="addFromInput(); return false;">
+      <input type="text" id="youtubeLink" placeholder="Paste a YouTube link or search your videos" autocomplete="off" oninput="onSearchInput()">
+      <button type="submit" title="Watch">
+        <svg viewBox="0 0 24 24"><path d="M20.87 20.17l-5.59-5.59A7.46 7.46 0 0 0 17 10a7 7 0 1 0-7 7c1.75 0 3.35-.64 4.58-1.71l5.59 5.59.7-.71zM10 16a6 6 0 1 1 0-12 6 6 0 0 1 0 12z"/></svg>
+      </button>
+    </form>
+    <div class="topbar-right">
+      <div class="menu-wrap">
+        <div class="avatar" onclick="toggleMenu(event)" title="Menu">G</div>
+        <div class="menu hidden" id="menu">
+          <button onclick="exportLibrary()">⬇️ Back up my videos & timestamps</button>
+          <button onclick="document.getElementById('importFile').click()">⬆️ Restore from backup</button>
+          <hr>
+          <button onclick="showShortcuts()">⌨️ Keyboard shortcuts</button>
+        </div>
+        <input type="file" id="importFile" accept=".json,application/json" class="hidden" onchange="importLibrary(this)">
+      </div>
+    </div>
   </header>
-
-  <p>Paste a YouTube video link below, write 20+ words about that video, and save it to your playlist!</p>
-  <input type="text" id="youtubeLink" placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
-  
-  <textarea id="accountabilityNote" placeholder="Write 20 words about that video"></textarea>
-  <div id="wordCount">0 / 20 words</div>
-
-  <button onclick="saveVideo()">Save</button>
-  <button onclick="clearAllVideos()">Clear All Videos</button>
-  
-  <div id="videoContainer"></div>
   <div id="error"></div>
 
-  <h2 style="margin-top:40px;">Saved Videos</h2>
-  <div id="savedVideos"></div>
+  <!-- Home: only videos you added -->
+  <main id="home" class="home"></main>
 
-  <footer>
-    © 2025 Gagan | GAGANTUBE – Watch Through Link
-  </footer>
+  <!-- Watch page -->
+  <main id="watch" class="watch hidden">
+    <div>
+      <div class="player-wrap">
+        <div id="player"></div>
+        <div id="pauseCover" class="cover" onclick="player && player.playVideo()">
+          <div class="big"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+        </div>
+        <div id="endCover" class="cover" onclick="replay()">
+          <div class="big"><svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg></div>
+        </div>
+      </div>
+
+      <h1 class="video-title" id="videoTitle"></h1>
+      <div class="channel">
+        <div class="avatar" id="channelAvatar"></div>
+        <div class="channel-name" id="channelName"></div>
+      </div>
+
+      <section class="notes">
+        <div class="notes-head">
+          <h3 id="tsHeading">Timestamps</h3>
+          <div class="notes-actions">
+            <button type="button" class="text-btn" id="copyBtn" onclick="copyTimestamps()">Copy all</button>
+            <button type="button" class="text-btn" id="clearBtn" onclick="clearTimestamps()">Clear all</button>
+          </div>
+        </div>
+        <form class="notes-form" onsubmit="addTimestamp(); return false;">
+          <input id="tsTime" placeholder="0:00" autocomplete="off">
+          <button type="button" class="pill" onclick="useCurrentTime()">Now</button>
+          <input id="tsText" placeholder="Write a note…" autocomplete="off">
+          <button type="submit" class="pill primary">Add</button>
+        </form>
+        <ul class="ts-list" id="tsList"></ul>
+        <div class="hint">Tip: press <kbd>T</kbd> to timestamp the current moment. Use the pencil to edit and the bin to delete.</div>
+      </section>
+    </div>
+
+    <aside class="side">
+      <div id="playlistPanel"></div>
+      <div class="side-head" id="sideHead">Your videos</div>
+      <div id="sideList"></div>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast"><span id="toastMsg"></span><button id="toastUndo" class="hidden">UNDO</button></div>
 
   <script>
-    function extractVideoID(url) {
+    const STORE_KEY = 'gagantube.videos';
+    const PL_KEY = 'gagantube.playlists';
+    // videos: [{id, title, author, notes:[{t, text}], added, pos, dur, lib}]
+    //   lib === false means the video only lives inside a playlist (not shown in "Your videos")
+    let videos = load();
+    // playlists: [{id, title, author, ids:[videoId...], added, last}]
+    let playlists = loadPlaylists();
+    let player = null, apiReady = false, currentId = null, currentList = null;
+    let autoplayNext = true;
+    try { autoplayNext = localStorage.getItem('gagantube.autoplay') !== 'off'; } catch {}
+    let filterText = '', editingIndex = -1, lastSave = 0;
+
+    function load() {
+      try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; } catch { return []; }
+    }
+    function loadPlaylists() {
+      try { return JSON.parse(localStorage.getItem(PL_KEY)) || []; } catch { return []; }
+    }
+    function save() {
       try {
-        let u = new URL(url);
-        if (u.hostname === "youtu.be") {
-          return u.pathname.slice(1);
-        }
-        if (u.searchParams.get("v")) {
-          return u.searchParams.get("v");
-        }
-        let parts = u.pathname.split("/");
-        let maybeID = parts[parts.length - 1];
-        if (maybeID.length === 11) return maybeID;
-      } catch (e) {
-        if (url.length === 11) return url;
+        localStorage.setItem(STORE_KEY, JSON.stringify(videos));
+        localStorage.setItem(PL_KEY, JSON.stringify(playlists));
+      } catch {}
+    }
+    const byId = id => videos.find(v => v.id === id);
+    const plById = id => playlists.find(p => p.id === id);
+    const inLibrary = v => v.lib !== false;
+    const snapshot = () => JSON.stringify({ videos, playlists });
+    const restore = snap => { ({ videos, playlists } = JSON.parse(snap)); save(); render(); };
+
+    function ensureVideo(id, lib, fetchTitle = true) {
+      let v = byId(id);
+      if (!v) {
+        v = { id, title: 'YouTube video', author: '', notes: [], added: Date.now(), lib };
+        videos.unshift(v);
+        if (fetchTitle) fetchInfo(id);
+      } else if (lib) {
+        v.lib = true;
       }
-      return null;
+      return v;
     }
 
-    function playVideo(videoID) {
-      document.getElementById('videoContainer').innerHTML =
-        `<iframe src="https://www.youtube.com/embed/${videoID}" allowfullscreen></iframe>`;
+    function extractPlaylistID(url) {
+      const m = url.match(/[?&]list=([a-zA-Z0-9_-]{10,})/);
+      return m ? m[1] : null;
+    }
+    const thumb = id => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+    function extractVideoID(url) {
+      const regExp = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+      const match = url.match(regExp);
+      return match ? match[1] : (/^[a-zA-Z0-9_-]{11}$/.test(url) ? url : null);
     }
 
-    function wordCount(str) {
-      return str.trim().split(/\s+/).filter(Boolean).length;
+    function fmt(sec) {
+      sec = Math.max(0, Math.floor(sec));
+      const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+      return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s).padStart(2, '0');
+    }
+    function parseTime(str) {
+      str = str.trim();
+      if (!str) return null;
+      if (!/^\d+(:\d{1,2}){0,2}$/.test(str)) return NaN;
+      return str.split(':').reduce((acc, n) => acc * 60 + Number(n), 0);
     }
 
-    function saveVideo() {
-      const input = document.getElementById('youtubeLink').value.trim();
-      const note = document.getElementById('accountabilityNote').value.trim();
-      const videoID = extractVideoID(input);
+    // ---------- Adding videos ----------
+    function addFromInput() {
+      const input = document.getElementById('youtubeLink');
       const error = document.getElementById('error');
-
-      if (!videoID) {
-        error.textContent = '⚠️ Invalid YouTube URL';
+      const listId = extractPlaylistID(input.value.trim());
+      const id = extractVideoID(input.value.trim());
+      if (listId) {
+        error.textContent = '';
+        input.value = '';
+        filterText = '';
+        addPlaylist(listId, id);
         return;
       }
-      if (wordCount(note) < 20) {
-        error.textContent = '⚠️ Please write at least 20 words before saving.';
+      if (!id) {
+        // Not a link: treat it as a search through your saved videos
+        if (input.value.trim() && currentId) goHome();
         return;
       }
       error.textContent = '';
-
-      let saved = JSON.parse(localStorage.getItem('gaganVideos') || '[]');
-
-      if (saved.length >= 100) {
-        alert('You can only save up to 100 videos.');
-        return;
-      }
-
-      if (!saved.some(v => v.id === videoID)) {
-        saved.push({ id: videoID, note: note });
-        localStorage.setItem('gaganVideos', JSON.stringify(saved));
-        renderSaved();
-      } else {
-        alert('This video is already saved.');
-      }
-
-      document.getElementById('youtubeLink').value = "";
-      document.getElementById('accountabilityNote').value = "";
-      document.getElementById('wordCount').textContent = "0 / 20 words";
+      input.value = '';
+      filterText = '';
+      ensureVideo(id, true);
+      save();
+      openVideo(id);
     }
 
-    function removeVideo(id) {
-      let saved = JSON.parse(localStorage.getItem('gaganVideos') || '[]');
-      saved = saved.filter(v => v.id !== id);
-      localStorage.setItem('gaganVideos', JSON.stringify(saved));
-      renderSaved();
-    }
-
-    function clearAllVideos() {
-      if (confirm("Are you sure you want to delete ALL saved videos?")) {
-        localStorage.removeItem('gaganVideos');
-        renderSaved();
+    // Title + channel from YouTube's oEmbed (falls back to noembed.com)
+    async function oembed(youtubeUrl) {
+      for (const base of ['https://www.youtube.com/oembed?format=json&url=', 'https://noembed.com/embed?url=']) {
+        try {
+          const res = await fetch(base + encodeURIComponent(youtubeUrl));
+          if (!res.ok) continue;
+          const data = await res.json();
+          if (data && data.title) return data;
+        } catch {}
       }
+      return {};
     }
 
-    function renderSaved() {
-      const saved = JSON.parse(localStorage.getItem('gaganVideos') || '[]');
-      const container = document.getElementById('savedVideos');
-      container.innerHTML = '';
-      saved.forEach(v => {
-        const card = document.createElement('div');
-        card.className = 'videoCard';
-        card.innerHTML = `
-          <button class="removeBtn">X</button>
-          <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg" alt="Thumbnail">
-          <p><b>Link:</b> https://youtu.be/${v.id}</p>
-          <p><b>Note:</b> ${v.note}</p>
-        `;
-        card.onclick = () => playVideo(v.id);
+    async function fetchInfo(id) {
+      try {
+        const data = await oembed(`https://www.youtube.com/watch?v=${id}`);
+        const v = byId(id);
+        if (v && data.title) {
+          v.title = data.title;
+          v.author = data.author_name || '';
+          save();
+          render();
+        }
+      } catch {}
+    }
 
-        const removeBtn = card.querySelector('.removeBtn');
-        removeBtn.onclick = (e) => {
-          e.stopPropagation();
-          removeVideo(v.id);
+    // ---------- Playlists ----------
+    // Uses a hidden YouTube player to read the playlist's video list (no API key needed)
+    function fetchPlaylistIds(listId) {
+      return new Promise((resolve, reject) => {
+        const whenReady = () => {
+          const holder = document.createElement('div');
+          const box = document.createElement('div');
+          box.style.cssText = 'position:fixed;left:-9999px;top:0;width:200px;height:120px;';
+          box.appendChild(holder);
+          document.body.appendChild(box);
+          let done = false, tries = 0, poll;
+          const finish = (ids) => {
+            if (done) return;
+            done = true;
+            clearInterval(poll);
+            try { helper.destroy(); } catch {}
+            box.remove();
+            ids && ids.length ? resolve(ids) : reject(new Error('empty'));
+          };
+          const helper = new YT.Player(holder, {
+            width: 200, height: 120,
+            playerVars: {
+              listType: 'playlist', list: listId, autoplay: 0, mute: 1,
+              origin: location.protocol.startsWith('http') ? location.origin : undefined
+            },
+            events: {
+              onReady: () => {
+                poll = setInterval(() => {
+                  const ids = helper.getPlaylist && helper.getPlaylist();
+                  if (ids && ids.length) finish(ids);
+                  else if (++tries > 40) finish(null);   // ~12s
+                }, 300);
+              },
+              onError: () => finish(null)
+            }
+          });
         };
-
-        container.appendChild(card);
+        if (apiReady) whenReady();
+        else {
+          const wait = setInterval(() => { if (apiReady) { clearInterval(wait); whenReady(); } }, 200);
+          setTimeout(() => { clearInterval(wait); if (!apiReady) reject(new Error('api')); }, 15000);
+        }
       });
     }
 
-    // Live word counter
-    document.getElementById('accountabilityNote').addEventListener('input', function() {
-      const count = wordCount(this.value);
-      document.getElementById('wordCount').textContent = count + " / 20 words";
-      if (count < 20) {
-        document.getElementById('wordCount').style.color = "#ff4d4d";
-      } else {
-        document.getElementById('wordCount').style.color = "#4dff88";
+    async function fetchPlaylistInfo(listId) {
+      try {
+        const data = await oembed('https://www.youtube.com/playlist?list=' + listId);
+        const pl = plById(listId);
+        if (pl && data.title) {
+          pl.title = data.title;
+          pl.author = data.author_name || pl.author || '';
+          save(); render();
+        }
+      } catch {}
+    }
+
+    // Load titles a few at a time so big playlists don't hammer the network
+    async function fetchTitles(ids) {
+      const todo = ids.filter(id => { const v = byId(id); return v && v.title === 'YouTube video'; });
+      const queue = todo.slice();
+      const worker = async () => {
+        while (queue.length) {
+          const id = queue.shift();
+          await fetchInfoQuiet(id);
+        }
+      };
+      await Promise.all([worker(), worker(), worker(), worker()]);
+      save(); render();
+    }
+    async function fetchInfoQuiet(id) {
+      try {
+        const data = await oembed(`https://www.youtube.com/watch?v=${id}`);
+        const v = byId(id);
+        if (v && data.title) { v.title = data.title; v.author = data.author_name || ''; }
+      } catch {}
+    }
+
+    async function addPlaylist(listId, startId) {
+      let pl = plById(listId);
+      const isNew = !pl;
+      if (isNew) {
+        pl = { id: listId, title: 'Playlist', author: '', ids: [], added: Date.now(), last: 0, loading: true };
+        playlists.unshift(pl);
+        save();
+      }
+      if (startId) { ensureVideo(startId, false); save(); openVideo(startId, listId); }
+      else render();
+      showToast(isNew ? 'Loading playlist…' : 'Refreshing playlist…', null, 3000);
+      fetchPlaylistInfo(listId);
+      try {
+        const ids = await fetchPlaylistIds(listId);
+        pl.ids = ids;
+        delete pl.loading;
+        ids.forEach(id => ensureVideo(id, false, false));
+        save();
+        showToast(`Saved playlist “${pl.title}” (${ids.length} video${ids.length === 1 ? '' : 's'})`, null, 3500);
+        if (!startId && !currentId) openVideo(ids[0], listId);
+        else render();
+        fetchTitles(ids);
+      } catch {
+        delete pl.loading;
+        if (isNew && !pl.ids.length) {
+          playlists = playlists.filter(p => p.id !== listId);
+        }
+        save(); render();
+        showToast('Couldn’t load that playlist. It may be private, or only viewable on YouTube.', null, 6000);
+      }
+    }
+
+    function openPlaylist(listId, e) {
+      if (e) e.stopPropagation();
+      const pl = plById(listId);
+      if (!pl || !pl.ids.length) return;
+      openVideo(pl.ids[Math.min(pl.last || 0, pl.ids.length - 1)], listId);
+    }
+
+    function removePlaylist(listId, e) {
+      e.stopPropagation();
+      const before = snapshot();
+      const pl = plById(listId);
+      playlists = playlists.filter(p => p.id !== listId);
+      // Drop videos that only existed for this playlist and have nothing worth keeping
+      const stillUsed = new Set(playlists.flatMap(p => p.ids));
+      videos = videos.filter(v => inLibrary(v) || stillUsed.has(v.id) || v.notes.length || v.id === currentId);
+      save();
+      if (currentList === listId) goHome(); else render();
+      showToast(`Removed playlist “${pl.title}”`, () => restore(before));
+    }
+
+    function playlistStep(dir) {
+      const pl = plById(currentList);
+      if (!pl) return;
+      const i = pl.ids.indexOf(currentId);
+      const next = pl.ids[i + dir];
+      if (next) openVideo(next, currentList);
+    }
+
+    function toggleAutoplay() {
+      autoplayNext = !autoplayNext;
+      try { localStorage.setItem('gagantube.autoplay', autoplayNext ? 'on' : 'off'); } catch {}
+      render();
+      showToast(autoplayNext ? 'Autoplay next video: on' : 'Autoplay next video: off', null, 2000);
+    }
+
+    function onSearchInput() {
+      const val = document.getElementById('youtubeLink').value.trim();
+      filterText = (extractVideoID(val) || extractPlaylistID(val)) ? '' : val.toLowerCase();
+      render();
+    }
+    const matches = v => !filterText ||
+      (v.title + ' ' + v.author + ' ' + v.notes.map(n => n.text).join(' ')).toLowerCase().includes(filterText);
+
+    function removeVideo(id, e) {
+      e.stopPropagation();
+      const before = snapshot();
+      if (playlists.some(p => p.ids.includes(id))) byId(id).lib = false;  // keep it for its playlist
+      else videos = videos.filter(v => v.id !== id);
+      save();
+      if (id === currentId && !currentList) goHome(); else render();
+      showToast('Removed from your videos', () => restore(before));
+    }
+
+    // ---------- Toast with undo ----------
+    let toastTimer;
+    function showToast(msg, undo, ms = 5000) {
+      const toast = document.getElementById('toast');
+      const btn = document.getElementById('toastUndo');
+      document.getElementById('toastMsg').textContent = msg;
+      btn.classList.toggle('hidden', !undo);
+      btn.onclick = () => { undo(); toast.classList.remove('show'); };
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), ms);
+    }
+
+    // ---------- Navigation ----------
+    function openVideo(id, listId) {
+      const hash = '#v=' + id + (listId ? '&list=' + listId : '');
+      if (location.hash !== hash) location.hash = hash;
+      else route();
+    }
+    function goHome() { location.hash = ''; }
+
+    function route() {
+      const m = location.hash.match(/v=([a-zA-Z0-9_-]{11})/);
+      const id = m ? m[1] : null;
+      const lm = location.hash.match(/list=([a-zA-Z0-9_-]+)/);
+      currentList = id && lm && plById(lm[1]) ? lm[1] : null;
+      if (id && !byId(id)) { ensureVideo(id, !currentList); save(); }
+      if (currentList) {
+        const pl = plById(currentList);
+        const i = pl.ids.indexOf(id);
+        if (i >= 0) { pl.last = i; save(); }
+      }
+      document.getElementById('home').classList.toggle('hidden', !!id);
+      document.getElementById('watch').classList.toggle('hidden', !id);
+      if (id && id !== currentId) {
+        currentId = id;
+        editingIndex = -1;
+        loadPlayer(id);
+        window.scrollTo(0, 0);
+      } else if (!id) {
+        currentId = null;
+        if (player) player.stopVideo();
+      }
+      render();
+    }
+    window.addEventListener('hashchange', route);
+
+    // ---------- Player (suggestions disabled) ----------
+    function onYouTubeIframeAPIReady() {
+      apiReady = true;
+      if (currentId) loadPlayer(currentId);
+    }
+
+    function loadPlayer(id) {
+      hideCovers();
+      document.getElementById('pauseCover').style.backgroundImage = `url(${thumb(id)})`;
+      document.getElementById('endCover').style.backgroundImage = `url(${thumb(id)})`;
+      if (!apiReady) return;
+      const start = resumePoint(id);
+      if (player) { player.loadVideoById({ videoId: id, startSeconds: start }); return; }
+      player = new YT.Player('player', {
+        videoId: id,
+        playerVars: {
+          autoplay: 1,
+          start,
+          mute: 0,
+          enablejsapi: 1,
+          origin: location.protocol.startsWith('http') ? location.origin : undefined,
+          rel: 0,             // no suggestions from other channels
+          modestbranding: 1,
+          iv_load_policy: 3,  // no annotations / cards
+          playsinline: 1,
+          fs: 1
+        },
+        events: { onStateChange }
+      });
+    }
+
+    // Resume where you left off (unless you were at the very start or end)
+    function resumePoint(id) {
+      const v = byId(id);
+      if (!v || !v.pos || !v.dur || v.pos < 10 || v.pos > v.dur - 15) return 0;
+      return Math.floor(v.pos);
+    }
+
+    function onStateChange(e) {
+      if (e.data === YT.PlayerState.ENDED) {
+        const v = byId(currentId);
+        if (v) { v.pos = v.dur = player.getDuration(); save(); }
+        // In a playlist: go straight to the next video instead of showing suggestions
+        const pl = plById(currentList);
+        if (pl && autoplayNext) {
+          const next = pl.ids[pl.ids.indexOf(currentId) + 1];
+          if (next) { openVideo(next, currentList); return; }
+        }
+      }
+      // Cover YouTube's "More videos" panel on pause and the suggestion wall at the end
+      document.getElementById('pauseCover').classList.toggle('show', e.data === YT.PlayerState.PAUSED);
+      document.getElementById('endCover').classList.toggle('show', e.data === YT.PlayerState.ENDED);
+    }
+    function hideCovers() {
+      document.getElementById('pauseCover').classList.remove('show');
+      document.getElementById('endCover').classList.remove('show');
+    }
+    function replay() { if (player) { player.seekTo(0, true); player.playVideo(); } }
+
+    // Every second: remember position, highlight the current timestamp section
+    setInterval(() => {
+      if (!player || !player.getPlayerState || !currentId) return;
+      if (player.getPlayerState() !== YT.PlayerState.PLAYING) return;
+      const v = byId(currentId);
+      if (!v) return;
+      v.pos = player.getCurrentTime();
+      v.dur = player.getDuration();
+      if (Date.now() - lastSave > 5000) { save(); lastSave = Date.now(); }
+      highlightCurrent();
+    }, 1000);
+
+    function highlightCurrent() {
+      const v = byId(currentId);
+      if (!v || !player || !player.getCurrentTime) return;
+      const now = player.getCurrentTime();
+      let cur = -1;
+      v.notes.forEach((n, i) => { if (n.t <= now) cur = i; });
+      document.querySelectorAll('#tsList li[data-i]').forEach(li =>
+        li.classList.toggle('current', Number(li.dataset.i) === cur));
+    }
+
+    // ---------- Timestamps ----------
+    function useCurrentTime() {
+      if (player && player.getCurrentTime) document.getElementById('tsTime').value = fmt(player.getCurrentTime());
+      document.getElementById('tsText').focus();
+    }
+
+    function addTimestamp() {
+      const v = byId(currentId);
+      if (!v) return;
+      const timeEl = document.getElementById('tsTime');
+      const textEl = document.getElementById('tsText');
+      let t = parseTime(timeEl.value);
+      if (Number.isNaN(t)) { timeEl.focus(); return; }
+      if (t === null) t = player && player.getCurrentTime ? Math.floor(player.getCurrentTime()) : 0;
+      const text = textEl.value.trim();
+      if (!text && !timeEl.value.trim()) { textEl.focus(); return; }
+      v.notes.push({ t, text });
+      v.notes.sort((a, b) => a.t - b.t);
+      save();
+      timeEl.value = ''; textEl.value = '';
+      renderNotes();
+    }
+
+    function deleteTimestamp(i) {
+      const v = byId(currentId);
+      const [removed] = v.notes.splice(i, 1);
+      editingIndex = -1;
+      save();
+      renderNotes();
+      showToast(`Deleted ${fmt(removed.t)} timestamp`, () => {
+        v.notes.push(removed);
+        v.notes.sort((a, b) => a.t - b.t);
+        save(); renderNotes();
+      });
+    }
+
+    function clearTimestamps() {
+      const v = byId(currentId);
+      if (!v || !v.notes.length) return;
+      const old = v.notes;
+      v.notes = [];
+      editingIndex = -1;
+      save();
+      render();
+      showToast(`Cleared ${old.length} timestamp${old.length > 1 ? 's' : ''}`, () => {
+        v.notes = old;
+        save(); render();
+      });
+    }
+
+    function startEdit(i) {
+      editingIndex = i;
+      renderNotes();
+      const el = document.querySelector('#tsList .edit-text');
+      if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+    }
+
+    function saveEdit(i) {
+      const v = byId(currentId);
+      const timeEl = document.querySelector('#tsList .edit-time');
+      const textEl = document.querySelector('#tsList .edit-text');
+      const t = parseTime(timeEl.value);
+      if (t === null || Number.isNaN(t)) { timeEl.focus(); return; }
+      v.notes[i] = { t, text: textEl.value.trim() };
+      v.notes.sort((a, b) => a.t - b.t);
+      editingIndex = -1;
+      save();
+      renderNotes();
+    }
+
+    function onEditKey(e, i) {
+      if (e.key === 'Enter') { e.preventDefault(); saveEdit(i); }
+      if (e.key === 'Escape') { editingIndex = -1; renderNotes(); }
+    }
+
+    async function copyTimestamps() {
+      const v = byId(currentId);
+      if (!v || !v.notes.length) return;
+      const text = v.notes.map(n => `${fmt(n.t)} ${n.text}`.trim()).join('\n');
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('Timestamps copied — paste them anywhere', null, 3000);
+      } catch {
+        showToast('Could not copy (browser blocked clipboard)', null, 3000);
+      }
+    }
+
+    // ---------- Backup / restore ----------
+    function toggleMenu(e) {
+      e.stopPropagation();
+      document.getElementById('menu').classList.toggle('hidden');
+    }
+    document.addEventListener('click', () => document.getElementById('menu').classList.add('hidden'));
+
+    function exportLibrary() {
+      const blob = new Blob([JSON.stringify({ app: 'gagantube', version: 2, videos, playlists }, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `gagantube-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showToast(`Backed up ${videos.length} video${videos.length === 1 ? '' : 's'} and ${playlists.length} playlist${playlists.length === 1 ? '' : 's'}`, null, 3000);
+    }
+
+    function importLibrary(input) {
+      const file = input.files[0];
+      input.value = '';
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          const incoming = Array.isArray(data) ? data : data.videos;
+          if (!Array.isArray(incoming)) throw new Error();
+          const before = snapshot();
+          let added = 0;
+          (Array.isArray(data.playlists) ? data.playlists : []).forEach(pl => {
+            if (!pl || !pl.id || !Array.isArray(pl.ids)) return;
+            if (!plById(pl.id)) { playlists.push({ id: pl.id, title: pl.title || 'Playlist', author: pl.author || '', ids: pl.ids, added: pl.added || Date.now(), last: pl.last || 0 }); added++; }
+          });
+          incoming.forEach(inc => {
+            if (!inc || !/^[a-zA-Z0-9_-]{11}$/.test(inc.id)) return;
+            const mine = byId(inc.id);
+            if (!mine) {
+              videos.push({ id: inc.id, title: inc.title || 'YouTube video', author: inc.author || '',
+                            notes: Array.isArray(inc.notes) ? inc.notes : [], added: inc.added || Date.now(),
+                            pos: inc.pos, dur: inc.dur, lib: inc.lib });
+              added++;
+            } else {
+              // Merge timestamps without duplicates
+              (inc.notes || []).forEach(n => {
+                if (!mine.notes.some(m => m.t === n.t && m.text === n.text)) mine.notes.push(n);
+              });
+              mine.notes.sort((a, b) => a.t - b.t);
+            }
+          });
+          save(); render();
+          showToast(`Restored backup (${added} new item${added === 1 ? '' : 's'})`, () => restore(before));
+        } catch {
+          showToast('That file is not a GAGANTUBE backup', null, 4000);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // ---------- Keyboard shortcuts ----------
+    function showShortcuts() {
+      showToast('T timestamp now · K play/pause · J / L back/forward 10s · N / P next/previous in playlist · / search · Esc close', null, 9000);
+    }
+
+    document.addEventListener('keydown', e => {
+      const typing = /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName);
+      if (e.key === 'Escape') {
+        document.getElementById('menu').classList.add('hidden');
+        if (typing) document.activeElement.blur();
+        return;
+      }
+      if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === '/') { e.preventDefault(); document.getElementById('youtubeLink').focus(); return; }
+      if (!currentId || !player || !player.getCurrentTime) return;
+      const key = e.key.toLowerCase();
+      if (key === 't') {
+        e.preventDefault();
+        document.getElementById('tsTime').value = fmt(player.getCurrentTime());
+        document.getElementById('tsText').focus();
+      } else if (key === 'k') {
+        player.getPlayerState() === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo();
+      } else if (key === 'j') {
+        player.seekTo(Math.max(0, player.getCurrentTime() - 10), true);
+      } else if (key === 'l') {
+        player.seekTo(player.getCurrentTime() + 10, true);
+      } else if (key === 'n') {
+        playlistStep(1);
+      } else if (key === 'p') {
+        playlistStep(-1);
       }
     });
 
-    renderSaved();
+    // Save position when leaving the page
+    window.addEventListener('beforeunload', () => {
+      if (player && player.getCurrentTime && currentId && byId(currentId)) {
+        byId(currentId).pos = player.getCurrentTime();
+        save();
+      }
+    });
+
+    function seek(t) {
+      if (!player) return;
+      player.seekTo(t, true);
+      player.playVideo();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ---------- Rendering ----------
+    function render() {
+      // Home grid
+      const shown = videos.filter(v => inLibrary(v) && matches(v));
+      const shownPl = playlists.filter(p => !filterText || (p.title + ' ' + p.author).toLowerCase().includes(filterText));
+      let home = '';
+      if (filterText && !shown.length && !shownPl.length) {
+        home = `<div class="empty-home">Nothing saved matches “${esc(filterText)}”. Paste a YouTube link to add one.</div>`;
+      }
+      if (shownPl.length) {
+        home += `<div class="section-head">Playlists</div>` + shownPl.map(playlistCard).join('');
+        if (shown.length) home += `<div class="section-head">Videos</div>`;
+      }
+      document.getElementById('home').innerHTML = home + shown.map(v => `
+        <div class="card" onclick="openVideo('${v.id}')">
+          <div class="thumb-wrap">
+            <img class="thumb" src="${thumb(v.id)}" alt="">
+            ${v.dur ? `<span class="badge">${fmt(v.dur)}</span>` : ''}
+            ${progressBar(v)}
+          </div>
+          <button class="remove" title="Remove" onclick="removeVideo('${v.id}', event)">✕</button>
+          <div class="meta">
+            <div class="title">${esc(v.title)}</div>
+            <div class="sub">${esc(v.author)}${v.notes.length ? (v.author ? ' • ' : '') + v.notes.length + ' timestamp' + (v.notes.length > 1 ? 's' : '') : ''}</div>
+          </div>
+        </div>`).join('');
+
+      if (!currentId) return;
+      const v = byId(currentId);
+      if (!v) return;
+      document.getElementById('videoTitle').textContent = v.title;
+      document.getElementById('channelName').textContent = v.author;
+      document.getElementById('channelAvatar').textContent = (v.author || '?')[0].toUpperCase();
+      document.title = v.title + ' - GAGANTUBE';
+
+      renderPlaylistPanel();
+
+      // Sidebar: only your own videos, never YouTube suggestions
+      const lib = videos.filter(x => inLibrary(x) && matches(x));
+      document.getElementById('sideHead').classList.toggle('hidden', !lib.length);
+      document.getElementById('sideList').innerHTML = lib.map(x => `
+        <div class="side-item ${x.id === currentId ? 'active' : ''}" onclick="openVideo('${x.id}')">
+          <div class="thumb-wrap">
+            <img src="${thumb(x.id)}" alt="">
+            ${progressBar(x)}
+          </div>
+          <div>
+            <div class="title">${esc(x.title)}</div>
+            <div class="sub">${esc(x.author)}</div>
+          </div>
+          <button class="remove" title="Remove" onclick="removeVideo('${x.id}', event)">✕</button>
+        </div>`).join('');
+
+      renderNotes();
+    }
+
+    const ICON_LIST = '<svg viewBox="0 0 24 24"><path d="M3 5h12v2H3zm0 4h12v2H3zm0 4h8v2H3zm13 0v6l5-3z"/></svg>';
+    const ICON_PREV = '<svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>';
+    const ICON_NEXT = '<svg viewBox="0 0 24 24"><path d="m6 18 8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>';
+    const ICON_AUTO = '<svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>';
+    const ICON_REFRESH = '<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>';
+
+    function playlistCard(pl) {
+      const first = pl.ids[0];
+      const watched = pl.ids.filter(id => { const v = byId(id); return v && v.dur && v.pos >= v.dur - 15; }).length;
+      return `
+        <div class="card pl-card" onclick="openPlaylist('${pl.id}')">
+          <div class="thumb-wrap">
+            ${first ? `<img class="thumb" src="${thumb(first)}" alt="">` : `<div class="thumb"></div>`}
+            <span class="pl-count">${ICON_LIST}${pl.loading ? 'Loading…' : pl.ids.length + ' video' + (pl.ids.length === 1 ? '' : 's')}</span>
+          </div>
+          <button class="remove" title="Remove playlist" onclick="removePlaylist('${pl.id}', event)">✕</button>
+          <div class="meta">
+            <div class="title">${esc(pl.title)}</div>
+            <div class="sub">${esc(pl.author ? pl.author + ' • ' : '')}Playlist${watched ? ` • ${watched}/${pl.ids.length} watched` : ''}</div>
+            <div class="sub"><a href="#" onclick="openPlaylist('${pl.id}', event); return false;">View full playlist</a></div>
+          </div>
+        </div>`;
+    }
+
+    function renderPlaylistPanel() {
+      const box = document.getElementById('playlistPanel');
+      const pl = plById(currentList);
+      if (!pl) { box.innerHTML = ''; return; }
+      const i = pl.ids.indexOf(currentId);
+      box.innerHTML = `
+        <div class="pl-panel">
+          <div class="pl-panel-head">
+            <div class="pl-panel-title">${esc(pl.title)}</div>
+            <div class="pl-panel-sub">${esc(pl.author ? pl.author + ' – ' : '')}${i >= 0 ? i + 1 : '–'} / ${pl.ids.length}</div>
+            <div class="pl-controls">
+              <button class="icon" title="Previous (P)" onclick="playlistStep(-1)" ${i <= 0 ? 'disabled style="opacity:.3"' : ''}>${ICON_PREV}</button>
+              <button class="icon" title="Next (N)" onclick="playlistStep(1)" ${i >= pl.ids.length - 1 ? 'disabled style="opacity:.3"' : ''}>${ICON_NEXT}</button>
+              <button class="icon ${autoplayNext ? 'on' : ''}" title="Autoplay next video: ${autoplayNext ? 'on' : 'off'}" onclick="toggleAutoplay()">${ICON_AUTO}</button>
+              <button class="icon" title="Refresh playlist from YouTube" onclick="addPlaylist('${pl.id}')">${ICON_REFRESH}</button>
+            </div>
+          </div>
+          <div class="pl-list" id="plList">
+            ${pl.loading && !pl.ids.length ? '<div class="loading">Loading playlist…</div>' : pl.ids.map((id, n) => {
+              const v = byId(id) || { title: 'YouTube video', author: '' };
+              return `
+              <div class="pl-item ${id === currentId ? 'active' : ''}" onclick="openVideo('${id}', '${pl.id}')">
+                <div class="pl-num">${id === currentId ? '▶' : n + 1}</div>
+                <div class="thumb-wrap"><img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="" ${Math.abs(n - i) > 12 ? 'loading="lazy"' : ''}>${progressBar(v)}</div>
+                <div>
+                  <div class="title">${esc(v.title)}</div>
+                  <div class="sub">${esc(v.author)}</div>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+      // Keep the playing video in view inside the list
+      const active = box.querySelector('.pl-item.active');
+      if (active) active.parentElement.scrollTop = active.offsetTop - active.parentElement.offsetTop - 60;
+    }
+
+    function progressBar(v) {
+      if (!v.pos || !v.dur) return '';
+      const pct = Math.min(100, Math.max(2, v.pos / v.dur * 100));
+      return `<div class="progress"><span style="width:${pct}%"></span></div>`;
+    }
+
+    const ICON_EDIT = '<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm17.71-10.21a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
+    const ICON_DELETE = '<svg viewBox="0 0 24 24"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
+    const ICON_CHECK = '<svg viewBox="0 0 24 24"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+    const ICON_CLOSE = '<svg viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
+
+    function renderNotes() {
+      const v = byId(currentId);
+      const list = document.getElementById('tsList');
+      const count = v ? v.notes.length : 0;
+      document.getElementById('tsHeading').textContent = count ? `Timestamps (${count})` : 'Timestamps';
+      document.getElementById('copyBtn').classList.toggle('hidden', !count);
+      document.getElementById('clearBtn').classList.toggle('hidden', !count);
+      if (!count) {
+        list.innerHTML = '<li class="ts-empty">No timestamps yet.</li>';
+        return;
+      }
+      list.innerHTML = v.notes.map((n, i) => i === editingIndex ? `
+        <li data-i="${i}">
+          <input class="edit-time" value="${fmt(n.t)}" onkeydown="onEditKey(event, ${i})">
+          <input class="edit-text" value="${esc(n.text)}" placeholder="Note" onkeydown="onEditKey(event, ${i})">
+          <button class="icon" title="Save" onclick="saveEdit(${i})">${ICON_CHECK}</button>
+          <button class="icon" title="Cancel" onclick="editingIndex = -1; renderNotes()">${ICON_CLOSE}</button>
+        </li>` : `
+        <li data-i="${i}">
+          <a onclick="seek(${n.t})">${fmt(n.t)}</a>
+          <span class="note">${esc(n.text)}</span>
+          <button class="icon" title="Edit" onclick="startEdit(${i})">${ICON_EDIT}</button>
+          <button class="icon" title="Delete" onclick="deleteTimestamp(${i})">${ICON_DELETE}</button>
+        </li>`).join('');
+      highlightCurrent();
+    }
+
+    route();
+
+    if (location.protocol === 'file:') {
+      document.getElementById('error').textContent =
+        '⚠️ YouTube won\'t play videos from a file opened directly. Double-click "Start GAGANTUBE.command" in this folder instead.';
+    }
+
+    // Load the YouTube API only after onYouTubeIframeAPIReady exists
+    if (window.YT && YT.loaded) onYouTubeIframeAPIReady();
+    else {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.body.appendChild(tag);
+    }
   </script>
 
 </body>
