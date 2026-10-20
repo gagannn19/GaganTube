@@ -76,6 +76,11 @@
     }
     .search button:hover { background: var(--surface); }
     .search svg { width: 22px; height: 22px; fill: var(--text); }
+    .add-btn {
+      height: 40px; padding: 0 20px; margin-left: 8px; border-radius: 20px;
+      background: var(--red); color: #fff; font-weight: 500; white-space: nowrap;
+    }
+    .add-btn:hover { background: #e0002d; }
 
     .avatar {
       width: 32px; height: 32px; border-radius: 50%;
@@ -107,11 +112,16 @@
     .card .sub { color: var(--text-2); margin-top: 4px; }
     .remove {
       position: absolute; top: 8px; right: 8px;
-      width: 28px; height: 28px; border-radius: 50%;
-      background: rgba(0,0,0,.7); font-size: 16px; line-height: 28px;
-      opacity: 0; transition: opacity .15s;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(0,0,0,.75); display: grid; place-items: center;
+      opacity: .8; transition: opacity .15s, background .15s;
     }
+    .remove svg { width: 18px; height: 18px; fill: #fff; }
+    .remove:hover { background: var(--red); }
     .card:hover .remove, .side-item:hover .remove { opacity: 1; }
+    .delete-btn { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+    .delete-btn svg { width: 18px; height: 18px; fill: currentColor; }
+    .delete-btn:hover { background: rgba(255,0,51,.2); color: #ff4e45; }
 
     /* ---------- Watch page ---------- */
     .watch {
@@ -326,6 +336,7 @@
       .topbar-right { min-width: 0; }
       .search { margin: 0 8px; }
       .search button { width: 48px; }
+      .add-btn { padding: 0 14px; margin-left: 4px; }
       .home, .watch { padding: 16px 0; }
       .player-wrap { border-radius: 0; }
       .watch > div > :not(.player-wrap), .side, .home { padding-left: 12px; padding-right: 12px; }
@@ -342,11 +353,12 @@
         <small class="tagline">Your videos. Zero distractions.</small>
       </span>
     </a>
-    <form class="search" onsubmit="addFromInput(); return false;">
+    <form class="search" onsubmit="onEnter(); return false;">
       <input type="text" id="youtubeLink" placeholder="Paste a YouTube link or search your videos" autocomplete="off" oninput="onSearchInput()">
-      <button type="submit" title="Watch">
+      <button type="button" title="Search your videos" onclick="searchVideos()">
         <svg viewBox="0 0 24 24"><path d="M20.87 20.17l-5.59-5.59A7.46 7.46 0 0 0 17 10a7 7 0 1 0-7 7c1.75 0 3.35-.64 4.58-1.71l5.59 5.59.7-.71zM10 16a6 6 0 1 1 0-12 6 6 0 0 1 0 12z"/></svg>
       </button>
+      <button type="button" class="add-btn" title="Add the pasted YouTube link" onclick="addFromInput()">Add</button>
     </form>
     <div class="topbar-right">
       <div class="menu-wrap">
@@ -383,6 +395,7 @@
       <div class="channel">
         <div class="avatar" id="channelAvatar"></div>
         <div class="channel-name" id="channelName"></div>
+        <button type="button" class="pill delete-btn" id="deleteBtn" title="Delete this video from your videos" onclick="removeVideo(currentId, event)"></button>
       </div>
 
       <section class="notes">
@@ -495,16 +508,40 @@
         return;
       }
       if (!id) {
-        // Not a link: treat it as a search through your saved videos
-        if (input.value.trim() && currentId) goHome();
+        showToast('Paste a YouTube link first, then click Add', null, 3000);
+        input.focus();
         return;
       }
       error.textContent = '';
       input.value = '';
       filterText = '';
+      const isNew = !byId(id) || !inLibrary(byId(id));
       ensureVideo(id, true);
       save();
-      openVideo(id);
+      render();
+      showToast(isNew ? 'Video added to your videos' : 'That video is already in your videos', null, 2500);
+    }
+
+    // Search only through videos you've already added
+    function searchVideos() {
+      const input = document.getElementById('youtubeLink');
+      const val = input.value.trim();
+      const id = extractVideoID(val);
+      if (id) {
+        // Searching with a link: open it if it's saved, otherwise suggest Add
+        if (byId(id) && inLibrary(byId(id))) { input.value = ''; filterText = ''; openVideo(id); }
+        else showToast('This video isn’t in your videos yet — click Add', null, 3000);
+        return;
+      }
+      filterText = val.toLowerCase();
+      if (currentId) goHome(); else render();
+    }
+
+    // Enter key: a link gets added, anything else is a search
+    function onEnter() {
+      const val = document.getElementById('youtubeLink').value.trim();
+      if (extractVideoID(val) || extractPlaylistID(val)) addFromInput();
+      else searchVideos();
     }
 
     // Title + channel from YouTube's oEmbed (falls back to noembed.com)
@@ -1024,7 +1061,7 @@
       const shownPl = playlists.filter(p => !filterText || (p.title + ' ' + p.author).toLowerCase().includes(filterText));
       let home = '';
       if (filterText && !shown.length && !shownPl.length) {
-        home = `<div class="empty-home">Nothing saved matches “${esc(filterText)}”. Paste a YouTube link to add one.</div>`;
+        home = `<div class="empty-home">Nothing saved matches “${esc(filterText)}”. Paste a YouTube link and click Add.</div>`;
       }
       if (shownPl.length) {
         home += `<div class="section-head">Playlists</div>` + shownPl.map(playlistCard).join('');
@@ -1037,7 +1074,7 @@
             ${v.dur ? `<span class="badge">${fmt(v.dur)}</span>` : ''}
             ${progressBar(v)}
           </div>
-          <button class="remove" title="Remove" onclick="removeVideo('${v.id}', event)">✕</button>
+          <button class="remove" title="Delete video" onclick="removeVideo('${v.id}', event)">${ICON_DELETE}</button>
           <div class="meta">
             <div class="title">${esc(v.title)}</div>
             <div class="sub">${esc(v.author)}${v.notes.length ? (v.author ? ' • ' : '') + v.notes.length + ' timestamp' + (v.notes.length > 1 ? 's' : '') : ''}</div>
@@ -1051,6 +1088,9 @@
       document.getElementById('channelName').textContent = v.author;
       document.getElementById('channelAvatar').textContent = (v.author || '?')[0].toUpperCase();
       document.title = v.title + ' - GAGANTUBE';
+      const delBtn = document.getElementById('deleteBtn');
+      delBtn.classList.toggle('hidden', !inLibrary(v));
+      delBtn.innerHTML = ICON_DELETE + 'Delete';
 
       renderPlaylistPanel();
 
@@ -1067,7 +1107,7 @@
             <div class="title">${esc(x.title)}</div>
             <div class="sub">${esc(x.author)}</div>
           </div>
-          <button class="remove" title="Remove" onclick="removeVideo('${x.id}', event)">✕</button>
+          <button class="remove" title="Delete video" onclick="removeVideo('${x.id}', event)">${ICON_DELETE}</button>
         </div>`).join('');
 
       renderNotes();
@@ -1088,7 +1128,7 @@
             ${first ? `<img class="thumb" src="${thumb(first)}" alt="">` : `<div class="thumb"></div>`}
             <span class="pl-count">${ICON_LIST}${pl.loading ? 'Loading…' : pl.ids.length + ' video' + (pl.ids.length === 1 ? '' : 's')}</span>
           </div>
-          <button class="remove" title="Remove playlist" onclick="removePlaylist('${pl.id}', event)">✕</button>
+          <button class="remove" title="Delete playlist" onclick="removePlaylist('${pl.id}', event)">${ICON_DELETE}</button>
           <div class="meta">
             <div class="title">${esc(pl.title)}</div>
             <div class="sub">${esc(pl.author ? pl.author + ' • ' : '')}Playlist${watched ? ` • ${watched}/${pl.ids.length} watched` : ''}</div>
